@@ -18,5 +18,5 @@ export function* characterGenerator(allowedTypes, maxLevel) {
 export function generateTeam(allowedTypes, maxLevel, characterCount) {
   const characters = [...characterGenerator(allowedTypes, maxLevel)];
   const indices = getNotUniqueRandomSequence(characterCount, characters.length - 1, 0);
-  return indices.map((index) => characters[index]);
+  return indices.map((index) => characters[index].clone());
 }

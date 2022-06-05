@@ -10,4 +10,27 @@ export default class Character {
       throw TypeError('class Character is abstract class');
     }
   }
+
+  clone() {
+    return this.constructor(
+      this.level,
+      this.attack,
+      this.defense, 
+      Object.assign({}, this.ranges), 
+      this.type,
+    );
+  }
+
+  giveDamage(target) {
+    const damage = Math.max(this.attack - target.defense, this.attack * 0.1);
+    target.takeDamage(damage);
+    return damage;
+  }
+
+  takeDamage(damage) {
+    this.health -= damage;
+    if (this.health < 0) {
+      this.health = 0;
+    }
+  }
 }

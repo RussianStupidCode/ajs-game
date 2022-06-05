@@ -30,10 +30,27 @@ export default class GamePlay {
   }
 
   static isCharacterMoving(maxCharacterRange, range) {
-    if (maxCharacterRange < range) {
+    const remainder = range / Math.sqrt(2);
+
+    if (range % 1 === 0 && maxCharacterRange >= range) {
+      return true;
+    }
+
+    if (remainder > maxCharacterRange) {
       return false;
     }
-    return range % 1 === 0 || range % Math.sqrt(2) === 0;
+
+    return CoordinateConverter.isDoubleEqual(remainder % 1, 1) || remainder % 1 === 0;
+  }
+
+  static isCharacterAttack(maxCharacterRange, range) {
+    const remainder = range / Math.sqrt(2);
+
+    if (range % 1 === 0 && maxCharacterRange >= range) {
+      return true;
+    }
+
+    return range < maxCharacterRange + 1;
   }
 
   constructor() {
@@ -166,7 +183,7 @@ export default class GamePlay {
         return cellActions.move;
     }
 
-    if (range <= character.ranges.attack && this.getCharacter(index)) {
+    if (GamePlay.isCharacterAttack(character.ranges.attack, range) && this.getCharacter(index)) {
       return cellActions.attack;
     }
 
@@ -216,6 +233,16 @@ export default class GamePlay {
     this.cells = Array.from(this.boardEl.children);
   }
 
+  attack(attackerIndex, targetIndex) {
+    const attacker = this.getCharacter(attackerIndex).character;
+    const target = this.getCharacter(targetIndex).character;
+    const damage = attacker.giveDamage(target);
+
+    this.showDamage(targetIndex, damage).then(() => {
+      this.redrawPositions([...this.playerTeam, ...this.computerTeam]);
+    });
+  }
+
   isUserCharacter(index) {
     return this.playerTeam.getCharacter(index) !== undefined;
   }
@@ -226,6 +253,12 @@ export default class GamePlay {
 
   getCharacter(index) {
     return this.playerTeam.getCharacter(index) || this.computerTeam.getCharacter(index);
+  }
+
+  moveCharacter(oldPosition, newPosition) {
+    const positionedCharacter = this.getCharacter(oldPosition);
+    positionedCharacter.position = newPosition;
+    this.redrawPositions([...this.playerTeam, ...this.computerTeam]);
   }
 
   /**

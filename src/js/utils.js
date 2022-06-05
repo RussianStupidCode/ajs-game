@@ -42,6 +42,16 @@ export class CoordinateConverter {
     };
   }
 
+  static isDoubleEqual(first, second, eps=1e-4) {
+    let relation = Math.abs(first / second);
+    
+    if (second === 0) {
+      relation = Math.abs(first - second);
+    }
+
+    return relation < 1 + eps && relation > 1 - eps;
+  }
+
   static squareToLinear(row, column, rowSize) {
     return row * rowSize + column;
   }
