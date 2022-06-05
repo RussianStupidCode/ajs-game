@@ -81,6 +81,12 @@ export default class GamePlay {
     this.container = container;
   }
 
+  getAllEmptyCells() {
+    const nonEmptyIndices = new Set([...this.playerTeam, ...this.computerTeam].map((el) => el.position));
+    const allCellIndices = Array(this.boardSize ** 2).fill(0).map((el, index) => index);
+    return allCellIndices.filter((el) => !nonEmptyIndices.has(el));
+  }
+
   getComputerTeamCoordinates() {
     const startCharacterRowNumber = Array(this.boardSize).fill(0).map((el, index) => index);
     const startCharacterColumnNumber = [this.boardSize - 2, this.boardSize - 1];
@@ -171,9 +177,13 @@ export default class GamePlay {
   }
 
   getCellActionForSelectedCell(index, selectedCellIndex) {
-    const character = this.playerTeam.getCharacter(selectedCellIndex).character;
+    const character = this.getCharacter(selectedCellIndex).character;
 
-    if (this.isUserCharacter(index)) {
+    if (this.isUserCharacter(index) && this.isUserCharacter(selectedCellIndex)) {
+      return cellActions.select;
+    }
+
+    if (this.isComputerCharacter(index) && this.isComputerCharacter(selectedCellIndex)) {
       return cellActions.select;
     }
 

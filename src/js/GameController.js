@@ -4,7 +4,7 @@ import GamePlay from './GamePlay';
 import { getCharacterTooltip } from './utils';
 import cellActions from './cell_actions';
 import cursors from './cursors';
-import AIController from './AIControler';
+import AIController from './AIController';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -17,6 +17,7 @@ export default class GameController {
       attack: this.attack.bind(this),
       move: this.move.bind(this),
       select: this.select.bind(this),
+      pass: this.pass.bind(this),
     });
   }
 
@@ -94,6 +95,16 @@ export default class GameController {
     this.state.isPlayerStep = !this.state.isPlayerStep;
   }
 
+  pass() {
+    if (this.state.selectCellIndex != null) {
+      this.gamePlay.deselectCell(this.state.selectCellIndex);
+    }
+    this.state.selectCellIndex = null;
+    this.setCursor(cellActions.none);
+
+    this.state.isPlayerStep = !this.state.isPlayerStep;
+  }
+
   setCursor(action) {
     const cursor = this.getCursor(action);
     this.gamePlay.setCursor(cursor);
@@ -121,10 +132,14 @@ export default class GameController {
   }
 
   attack(attackerIndex, targetIndex) {
+  
     this.gamePlay.attack(attackerIndex, targetIndex);
     this.currentAction = cellActions.none;
     this.setCursor(this.currentAction);
     this.state.isPlayerStep = !this.state.isPlayerStep;
+    this.state.selectCellIndex = null;
+    this.gamePlay.deselectCell(targetIndex);
+    this.gamePlay.deselectCell(attackerIndex);
   }
 
   onCellClick(index) {
