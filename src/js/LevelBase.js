@@ -1,3 +1,5 @@
+import { getRandomElements } from "./random_generators";
+
 export default class LevelBase {
   constructor(levelProperties = []) {
     this.levelProperties = levelProperties;
@@ -8,8 +10,8 @@ export default class LevelBase {
   }
 
   getLevelProperty(levelNumber) {
-    if (levelNumber < 1 || levelNumber >= this.levelProperties) {
-      throw Error(`not found levelProperty for level number = ${levelNumber}`);
+    if (levelNumber < 1 || levelNumber >= this.levelProperties.length) {
+      return getRandomElements(this.levelProperties, 1)[0];
     }
     return this.levelProperties[levelNumber - 1];
   }

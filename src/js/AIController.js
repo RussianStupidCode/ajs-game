@@ -23,7 +23,11 @@ export default class AIController {
   }
 
   takeStep() {
-    const positionedCharacter = getRandomElements(this.gamePlay.computerTeam.onlyLiveCharacters, 1)[0];
+    if(this.gamePlay.computerTeam.length === 0) {
+      this.functions.pass();
+    }
+
+    const positionedCharacter = getRandomElements(this.gamePlay.computerTeam, 1)[0];
 
     if (positionedCharacter == undefined) {
       this.functions.pass();

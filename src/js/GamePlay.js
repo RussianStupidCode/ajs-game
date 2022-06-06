@@ -53,7 +53,10 @@ export default class GamePlay {
     return range < maxCharacterRange + 1;
   }
 
-  constructor() {
+  constructor(gameStatusChangeCallbacks = {
+    playerWin: () => {},
+    computerWin: () => {},
+  }) {
     this.boardSize = 8;
     this.container = null;
     this.boardEl = null;
@@ -72,6 +75,7 @@ export default class GamePlay {
       new LevelProperty('3', themes.arctic, [Swordsman, Bowman, Magician], [Daemon, Undead, Vampire], 2),
       new LevelProperty('4', themes.mountain, [Swordsman, Bowman, Magician], [Daemon, Undead, Vampire], 2),
     ]);
+    this.gameStatusChangeCallbacks = gameStatusChangeCallbacks;
   }
 
   bindToDOM(container) {
@@ -79,6 +83,10 @@ export default class GamePlay {
       throw new Error('container is not HTMLElement');
     }
     this.container = container;
+  }
+
+  setGameStatusChangeCallbacks(gameStatusChangeCallbacks) {
+    this.gameStatusChangeCallbacks = gameStatusChangeCallbacks;
   }
 
   getAllEmptyCells() {
@@ -107,10 +115,11 @@ export default class GamePlay {
     );
   }
 
-  startNewLevel(state) {
-    const levelProperty = this.LevelBase.getLevelProperty(state.level);
+  startNewLevel(level) {
+    const levelProperty = this.LevelBase.getLevelProperty(level);
+    this.playerTeam.levelUp();
     this.drawUi(levelProperty.theme);
-    this.refreshTeamsForNewLevel(levelProperty, state.level);
+    this.refreshTeamsForNewLevel(levelProperty, level);
   }
 
   startNewGame() {
@@ -243,12 +252,25 @@ export default class GamePlay {
     this.cells = Array.from(this.boardEl.children);
   }
 
-  attack(attackerIndex, targetIndex) {
+  async attack(attackerIndex, targetIndex) {
     const attacker = this.getCharacter(attackerIndex).character;
     const target = this.getCharacter(targetIndex).character;
+
     const damage = attacker.giveDamage(target);
 
-    this.showDamage(targetIndex, damage).then(() => {
+   await this.showDamage(targetIndex, damage).then(() => {
+      this.playerTeam.clearDeadСharacters();
+      this.computerTeam.clearDeadСharacters();
+
+      if(this.playerTeam.length === 0) {
+        this.gameStatusChangeCallbacks.computerWin();
+        return;
+      } 
+
+      if(this.computerTeam.length === 0) {
+        this.gameStatusChangeCallbacks.playerWin();
+      }
+
       this.redrawPositions([...this.playerTeam, ...this.computerTeam]);
     });
   }
@@ -297,6 +319,10 @@ export default class GamePlay {
       charEl.appendChild(healthEl);
       cellEl.appendChild(charEl);
     }
+  }
+
+  addNextLevelC(callback) {
+
   }
 
   /**

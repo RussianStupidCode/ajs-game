@@ -5,6 +5,7 @@ import { getCharacterTooltip } from './utils';
 import cellActions from './cell_actions';
 import cursors from './cursors';
 import AIController from './AIController';
+import gameStatus from './game_status';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -19,9 +20,15 @@ export default class GameController {
       select: this.select.bind(this),
       pass: this.pass.bind(this),
     });
+
   }
 
   init() {
+    this.gamePlay.setGameStatusChangeCallbacks({
+      playerWin: this.nextLevel.bind(this),
+      computerWin: this.endGame.bind(this),
+    });
+
     this.gamePlay.drawUi(themes.prairie);
     this.addGameContolsListeners();
     this.addCellListeners();
@@ -43,6 +50,18 @@ export default class GameController {
       default:
         return cursors.auto;
     }
+  }
+
+  nextLevel() {
+    this.state.gameStatus = gameStatus.playerWin;
+    this.state.level++;
+    this.state.isPlayerStep = true;
+    this.gamePlay.startNewLevel(this.state.level);
+    this.state.gameStatus = gameStatus.game;
+  }
+
+  endGame() {
+    console.log('computer win');
   }
 
   cellHighlight(index, action) {
@@ -79,6 +98,7 @@ export default class GameController {
 
   onNewGameClick() {
     this.state = new GameState({});
+    this.state.gameStatus = gameStatus.game;
     this.gamePlay.startNewGame();
   }
 
@@ -131,9 +151,9 @@ export default class GameController {
     this.gamePlay.selectCell(index);
   }
 
-  attack(attackerIndex, targetIndex) {
+  async attack(attackerIndex, targetIndex) {
   
-    this.gamePlay.attack(attackerIndex, targetIndex);
+    await this.gamePlay.attack(attackerIndex, targetIndex);
     this.currentAction = cellActions.none;
     this.setCursor(this.currentAction);
     this.state.isPlayerStep = !this.state.isPlayerStep;
@@ -142,23 +162,26 @@ export default class GameController {
     this.gamePlay.deselectCell(attackerIndex);
   }
 
-  onCellClick(index) {
-
-    if (this.state.isPlayerStep) {
-      switch (this.currentAction) {
-        case cellActions.move:
-          this.move(this.state.selectCellIndex, index);
-          break;
-        case cellActions.select:
-          this.select(index);
-          break;
-        case cellActions.attack:
-          this.attack(this.state.selectCellIndex, index);
-          break;
-      }
+  async onCellClick(index) {
+    if(!this.state.isPlayerStep || this.state.gameStatus !== gameStatus.game) {
+      return;
     }
 
-    if(!this.state.isPlayerStep) {
+    switch (this.currentAction) {
+      case cellActions.move:
+        this.move(this.state.selectCellIndex, index);
+        break;
+      case cellActions.select:
+        this.select(index);
+        break;
+      case cellActions.attack:
+        await this.attack(this.state.selectCellIndex, index);
+        break;
+    }
+
+    this.nextLevel();
+
+    if(!this.state.isPlayerStep && this.state.gameStatus === gameStatus.game) {
       this.computer.takeStep();
     }
   }

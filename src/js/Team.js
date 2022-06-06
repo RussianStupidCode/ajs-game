@@ -36,15 +36,21 @@ export default class Team {
   }
 
   clearDeadСharacters() {
-    this.positionedCharacters = this.onlyLiveCharacters;
+    this.positionedCharacters = this.positionedCharacters.filter((el) => el.character.health > 0);
   }
 
   * [Symbol.iterator]() {
     yield* this.positionedCharacters;
   }
 
-  get onlyLiveCharacters() {
-    return this.positionedCharacters.filter((el) => el.character.health > 0);
+  levelUp() {
+    this.positionedCharacters.forEach((el) => {
+      el.character.levelUp();
+    });
+  }
+
+  get sumHealth() {
+    return this.characters.reduce((acc, el) => acc + el.character.health, 0);
   }
 
   clear() {
