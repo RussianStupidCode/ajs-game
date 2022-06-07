@@ -1,11 +1,10 @@
 import GameState from './GameState';
 import themes from './themes';
-import GamePlay from './GamePlay';
 import { getCharacterTooltip } from './utils';
 import cellActions from './cell_actions';
 import cursors from './cursors';
 import AIController from './AIController';
-import gameStatus from './game_status';
+import gameStage from './game_stage';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -24,7 +23,7 @@ export default class GameController {
   }
 
   init() {
-    this.gamePlay.setGameStatusChangeCallbacks({
+    this.gamePlay.setGameStageChangeCallbacks({
       playerWin: this.nextLevel.bind(this),
       computerWin: this.endGame.bind(this),
     });
@@ -53,14 +52,18 @@ export default class GameController {
   }
 
   nextLevel() {
-    this.state.gameStatus = gameStatus.playerWin;
+    this.state.stage = gameStage.playerWin;
     this.state.level++;
     this.state.isPlayerStep = true;
     this.gamePlay.startNewLevel(this.state.level);
-    this.state.gameStatus = gameStatus.game;
+    this.state.stage = gameStage.game;
+
+    this.state.currentScore += this.gamePlay.playerTeam.sumHealth;
+    this.state.maxScore = Math.max(this.state.maxScore, this.state.currentScore);
   }
 
   endGame() {
+    this.state.stage = gameStage.computerWin;
     console.log('computer win');
   }
 
@@ -88,6 +91,8 @@ export default class GameController {
 
   addGameContolsListeners() {
     this.gamePlay.addNewGameListener(this.onNewGameClick.bind(this));
+    this.gamePlay.addSaveGameListener(this.onSaveGameClick.bind(this));
+    this.gamePlay.addLoadGameListener(this.onLoadGameClick.bind(this));
   }
 
   addCellListeners() {
@@ -98,8 +103,28 @@ export default class GameController {
 
   onNewGameClick() {
     this.state = new GameState({});
-    this.state.gameStatus = gameStatus.game;
+    this.state.stage = gameStage.game;
     this.gamePlay.startNewGame();
+  }
+
+  onSaveGameClick() {
+    this.state.playerTeam = this.gamePlay.playerTeam;
+    this.state.computerTeam = this.gamePlay.computerTeam;
+    this.stateService.save(this.state);
+    console.log('save', this.state);
+  }
+
+  onLoadGameClick() {
+    const maxScore = this.state.maxScore;
+    this.state = GameState.from(this.stateService.load());
+    this.state.maxScore = maxScore;
+    this.gamePlay.startLoadPoint(this.state);
+
+    if(!this.state.isPlayerStep && this.state.stage === gameStage.game) {
+      this.computer.takeStep();
+    }
+
+    console.log('load', this.state);
   }
 
   move(oldIndex, newIndex) {
@@ -163,7 +188,7 @@ export default class GameController {
   }
 
   async onCellClick(index) {
-    if(!this.state.isPlayerStep || this.state.gameStatus !== gameStatus.game) {
+    if(!this.state.isPlayerStep || this.state.stage !== gameStage.game) {
       return;
     }
 
@@ -179,9 +204,7 @@ export default class GameController {
         break;
     }
 
-    this.nextLevel();
-
-    if(!this.state.isPlayerStep && this.state.gameStatus === gameStatus.game) {
+    if(!this.state.isPlayerStep && this.state.stage === gameStage.game) {
       this.computer.takeStep();
     }
   }

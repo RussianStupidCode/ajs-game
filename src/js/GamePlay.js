@@ -53,7 +53,7 @@ export default class GamePlay {
     return range < maxCharacterRange + 1;
   }
 
-  constructor(gameStatusChangeCallbacks = {
+  constructor(gameStageChangeCallbacks = {
     playerWin: () => {},
     computerWin: () => {},
   }) {
@@ -75,7 +75,7 @@ export default class GamePlay {
       new LevelProperty('3', themes.arctic, [Swordsman, Bowman, Magician], [Daemon, Undead, Vampire], 2),
       new LevelProperty('4', themes.mountain, [Swordsman, Bowman, Magician], [Daemon, Undead, Vampire], 2),
     ]);
-    this.gameStatusChangeCallbacks = gameStatusChangeCallbacks;
+    this.gameStageChangeCallbacks = gameStageChangeCallbacks;
   }
 
   bindToDOM(container) {
@@ -85,8 +85,8 @@ export default class GamePlay {
     this.container = container;
   }
 
-  setGameStatusChangeCallbacks(gameStatusChangeCallbacks) {
-    this.gameStatusChangeCallbacks = gameStatusChangeCallbacks;
+  setGameStageChangeCallbacks(gameStageChangeCallbacks) {
+    this.gameStageChangeCallbacks = gameStageChangeCallbacks;
   }
 
   getAllEmptyCells() {
@@ -120,6 +120,14 @@ export default class GamePlay {
     this.playerTeam.levelUp();
     this.drawUi(levelProperty.theme);
     this.refreshTeamsForNewLevel(levelProperty, level);
+  }
+
+  startLoadPoint(state) {
+    this.playerTeam = state.playerTeam;
+    this.computerTeam = state.computerTeam;
+    const levelProperty = this.LevelBase.getLevelProperty(state.level);
+    this.drawUi(levelProperty.theme);
+    this.redrawPositions([...this.playerTeam, ...this.computerTeam]);
   }
 
   startNewGame() {
@@ -263,12 +271,12 @@ export default class GamePlay {
       this.computerTeam.clearDeadСharacters();
 
       if(this.playerTeam.length === 0) {
-        this.gameStatusChangeCallbacks.computerWin();
+        this.gameStageChangeCallbacks.computerWin();
         return;
       } 
 
       if(this.computerTeam.length === 0) {
-        this.gameStatusChangeCallbacks.playerWin();
+        this.gameStageChangeCallbacks.playerWin();
       }
 
       this.redrawPositions([...this.playerTeam, ...this.computerTeam]);

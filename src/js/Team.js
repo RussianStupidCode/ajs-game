@@ -1,4 +1,19 @@
+import CharacterFactory from './CharacterFactory';
+import PositionedCharacter from './PositionedCharacter';
+
 export default class Team {
+  static from(object) {
+    const team = new Team(object.name, object.maxLength);
+
+    const positionedCharacters = object.positionedCharacters.map(({ character, position }) => {
+      const restoredCharacter = CharacterFactory.createCharacter(character);
+      return new PositionedCharacter(restoredCharacter, position);
+    })
+    team.add(...positionedCharacters);
+
+    return team;
+  }
+
   constructor(name, maxLength = -1) {
     this.classes = new Set();
     this.name = name;
