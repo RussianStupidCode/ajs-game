@@ -1,4 +1,4 @@
-# AJS. Retro Game
+# AJS. [Retro Game](https://github.com/netology-code/js-advanced-diploma)
 
 ###### tags: `netology` `advanced js`
 
