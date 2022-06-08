@@ -7,7 +7,7 @@ import Vampire from "./classes/Vampire";
 
 export default class CharacterFactory {
 
-  static createCharacter({level, attack, defense, ranges, type}) {
+  static createCharacter({level, attack, defense, health, ranges, type}) {
     let character = null;
     switch(type) {
       case 'bowman':
