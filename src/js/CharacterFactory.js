@@ -33,6 +33,7 @@ export default class CharacterFactory {
     // нужно установить действительыне занчнеия аттаки и защиты из-за levelup в конструкторе
     character.attack = attack;
     character.defense = defense;
+    character.health = health;
 
     return character;
   }
