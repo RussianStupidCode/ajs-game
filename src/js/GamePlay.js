@@ -229,12 +229,13 @@ export default class GamePlay {
       return cellActions.select;
     }
 
+    const otherPositionedCharacter = this.getCharacter(index);
     const isCharacterMoving = this.isCharacterMoving(positionedCharacter, index);
-    if (isCharacterMoving) {
+
+    if (!otherPositionedCharacter && isCharacterMoving) {
       return cellActions.move;
     }
 
-    const otherPositionedCharacter = this.getCharacter(index);
     const isCharacterAttack = this.isCharacterAttack(positionedCharacter, otherPositionedCharacter);
     if (isCharacterAttack) {
       return cellActions.attack;
