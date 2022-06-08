@@ -34,6 +34,10 @@ export function calcTileType(rowIndex, columnIndex, rowSize, columnSize = rowSiz
   return 'center';
 }
 
+export function round(number) {
+  return +number.toFixed(2);
+}
+
 export class CoordinateConverter {
   static linearToSquare(coordinate, rowSize) {
     return {

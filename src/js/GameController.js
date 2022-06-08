@@ -5,6 +5,7 @@ import cellActions from './cell_actions';
 import cursors from './cursors';
 import AIController from './AIController';
 import gameStage from './game_stage';
+import GamePlay from './GamePlay';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -60,11 +61,13 @@ export default class GameController {
 
     this.state.currentScore += this.gamePlay.playerTeam.sumHealth;
     this.state.maxScore = Math.max(this.state.maxScore, this.state.currentScore);
+
+    this.gamePlay.setScores(this.state.maxScore, this.state.currentScore);
   }
 
   endGame() {
     this.state.stage = gameStage.computerWin;
-    console.log('computer win');
+    GamePlay.showMessage('Компьютер победил');
   }
 
   cellHighlight(index, action) {
@@ -111,20 +114,27 @@ export default class GameController {
     this.state.playerTeam = this.gamePlay.playerTeam;
     this.state.computerTeam = this.gamePlay.computerTeam;
     this.stateService.save(this.state);
-    console.log('save', this.state);
+    GamePlay.showMessage('Игра сохранена');
   }
 
   onLoadGameClick() {
     const maxScore = this.state.maxScore;
-    this.state = GameState.from(this.stateService.load());
-    this.state.maxScore = maxScore;
+    try {
+      this.state = GameState.from(this.stateService.load());
+    }
+    catch (error) {
+      GamePlay.showMessage('Ошибка при загрзуке. Сохранение не найдено');
+    }
+    
+    this.state.maxScore = Math.max(maxScore, this.state.maxScore);
+    
     this.gamePlay.startLoadPoint(this.state);
+    this.gamePlay.setScores(this.state.maxScore, this.state.currentScore);
 
     if(!this.state.isPlayerStep && this.state.stage === gameStage.game) {
       this.computer.takeStep();
     }
 
-    console.log('load', this.state);
   }
 
   move(oldIndex, newIndex) {

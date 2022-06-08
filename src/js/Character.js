@@ -1,3 +1,5 @@
+import { round } from "./utils";
+
 export default class Character {
   constructor(level, attack = 0, defense = 0, ranges = { attack: 0, move: 0 }, type = 'generic') {
     this.level = 1;
@@ -38,6 +40,8 @@ export default class Character {
     if (this.health < 0) {
       this.health = 0;
     }
+
+    this.health = round(this.health);
   }
 
   levelUp() {
@@ -46,8 +50,8 @@ export default class Character {
     }
 
     this.level += 1;
-    this.attack = Math.max(this.attack, this.attack  * (180 - this.health) / 100);
-    this.defense = Math.max(this.defense, this.defense  * (180 - this.health) / 100);
-    this.health = Math.min(this.health + 80, 100);
+    this.attack = round(Math.max(this.attack, this.attack  * (180 - this.health) / 100));
+    this.defense = round(Math.max(this.defense, this.defense  * (180 - this.health) / 100));
+    this.health = round(Math.min(this.health + 80, 100));
   }
 }

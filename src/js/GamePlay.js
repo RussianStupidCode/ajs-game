@@ -226,6 +226,16 @@ export default class GamePlay {
     this.checkBinding();
 
     this.container.innerHTML = `
+      <div class="center-wrapper">
+        <div class="scores">
+          <span class="max-score">
+            Max score: <span class="max-score-number">0</span>
+          </span>
+          <span class="current-score">
+            Current score: <span class="current-score-number">0</span>
+          </span>
+        </div>
+      </div>
       <div class="controls">
         <button data-id="action-restart" class="btn">New Game</button>
         <button data-id="action-save" class="btn">Save Game</button>
@@ -258,6 +268,15 @@ export default class GamePlay {
     }
 
     this.cells = Array.from(this.boardEl.children);
+  }
+
+  setScores(maxScore, currentScore) {
+    const scoresEl = this.container.querySelector('.scores');
+    const maxScoreNumberEl = scoresEl.querySelector('.max-score-number');
+    const currentScoreNumberEl = scoresEl.querySelector('.current-score-number');
+
+    maxScoreNumberEl.textContent = maxScore;
+    currentScoreNumberEl.textContent = currentScore;
   }
 
   async attack(attackerIndex, targetIndex) {
