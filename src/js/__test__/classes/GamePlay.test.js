@@ -6,7 +6,6 @@ import Vampire from '../../classes/Vampire';
 import GamePlay from '../../GamePlay';
 import PositionedCharacter from '../../PositionedCharacter';
 import Team from '../../Team';
-import { CoordinateConverter } from '../../utils';
 
 function getGamePlay() {
   const gamePlay = new GamePlay();

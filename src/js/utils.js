@@ -46,9 +46,9 @@ export class CoordinateConverter {
     };
   }
 
-  static isDoubleEqual(first, second, eps=1e-4) {
+  static isDoubleEqual(first, second, eps = 1e-4) {
     let relation = Math.abs(first / second);
-    
+
     if (second === 0) {
       relation = Math.abs(first - second);
     }
@@ -63,7 +63,7 @@ export class CoordinateConverter {
   static getRangeForLinearCoordinate(firstPoint, secondPoint, rowSize) {
     const firstSquarePoint = CoordinateConverter.linearToSquare(firstPoint, rowSize);
     const secondSquarePoint = CoordinateConverter.linearToSquare(secondPoint, rowSize);
-    
+
     return CoordinateConverter.getRangeForSquareCoordinate(firstSquarePoint, secondSquarePoint);
   }
 

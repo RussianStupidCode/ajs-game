@@ -1,4 +1,4 @@
-import { getRandomElements } from "./random_generators";
+import { getRandomElements } from './random_generators';
 
 export default class LevelBase {
   constructor(levelProperties = []) {

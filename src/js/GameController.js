@@ -20,7 +20,6 @@ export default class GameController {
       select: this.select.bind(this),
       pass: this.pass.bind(this),
     });
-
   }
 
   init() {
@@ -34,9 +33,8 @@ export default class GameController {
     this.addCellListeners();
   }
 
-  getCursor(action) {
-
-    switch(action) {
+  static getCursor(action) {
+    switch (action) {
       case cellActions.none:
         return cursors.auto;
       case cellActions.move:
@@ -54,7 +52,7 @@ export default class GameController {
 
   nextLevel() {
     this.state.stage = gameStage.playerWin;
-    this.state.level++;
+    this.state.level += 1;
     this.state.isPlayerStep = true;
     this.gamePlay.startNewLevel(this.state.level);
     this.state.stage = gameStage.game;
@@ -84,12 +82,11 @@ export default class GameController {
     if (action === cellActions.move) {
       this.gamePlay.selectCell(this.currentCellIndex, 'green');
       return;
-    } 
+    }
 
     if (action === cellActions.attack) {
       this.gamePlay.selectCell(this.currentCellIndex, 'red');
-      return;
-    } 
+    }
   }
 
   addGameContolsListeners() {
@@ -107,7 +104,7 @@ export default class GameController {
   onNewGameClick() {
     this.state = new GameState({});
     this.state.stage = gameStage.game;
-    this.gamePlay.startNewGame();
+    this.gamePlay.startNewGame(this.state.level);
   }
 
   onSaveGameClick() {
@@ -118,23 +115,21 @@ export default class GameController {
   }
 
   onLoadGameClick() {
-    const maxScore = this.state.maxScore;
+    const { maxScore } = this.state;
     try {
       this.state = GameState.from(this.stateService.load());
+    } catch (error) {
+      GamePlay.showError('Ошибка при загрзуке. Сохранение не найдено');
     }
-    catch (error) {
-      GamePlay.showMessage('Ошибка при загрзуке. Сохранение не найдено');
-    }
-    
+
     this.state.maxScore = Math.max(maxScore, this.state.maxScore);
-    
+
     this.gamePlay.startLoadPoint(this.state);
     this.gamePlay.setScores(this.state.maxScore, this.state.currentScore);
 
-    if(!this.state.isPlayerStep && this.state.stage === gameStage.game) {
+    if (!this.state.isPlayerStep && this.state.stage === gameStage.game) {
       this.computer.takeStep();
     }
-
   }
 
   move(oldIndex, newIndex) {
@@ -145,7 +140,7 @@ export default class GameController {
     this.gamePlay.moveCharacter(oldIndex, newIndex);
     this.gamePlay.deselectCell(newIndex);
     this.state.selectCellIndex = null;
-    this.currentAction = cellActions.none
+    this.currentAction = cellActions.none;
     this.setCursor(this.currentAction);
     this.state.isPlayerStep = !this.state.isPlayerStep;
   }
@@ -161,7 +156,7 @@ export default class GameController {
   }
 
   setCursor(action) {
-    const cursor = this.getCursor(action);
+    const cursor = GameController.getCursor(action);
     this.gamePlay.setCursor(cursor);
   }
 
@@ -187,7 +182,6 @@ export default class GameController {
   }
 
   async attack(attackerIndex, targetIndex) {
-  
     await this.gamePlay.attack(attackerIndex, targetIndex);
     this.currentAction = cellActions.none;
     this.setCursor(this.currentAction);
@@ -198,7 +192,7 @@ export default class GameController {
   }
 
   async onCellClick(index) {
-    if(!this.state.isPlayerStep || this.state.stage !== gameStage.game) {
+    if (!this.state.isPlayerStep || this.state.stage !== gameStage.game) {
       return;
     }
 
@@ -212,9 +206,11 @@ export default class GameController {
       case cellActions.attack:
         await this.attack(this.state.selectCellIndex, index);
         break;
+      default:
+        break;
     }
 
-    if(!this.state.isPlayerStep && this.state.stage === gameStage.game) {
+    if (!this.state.isPlayerStep && this.state.stage === gameStage.game) {
       this.computer.takeStep();
     }
   }
@@ -226,7 +222,7 @@ export default class GameController {
       this.gamePlay.showCellTooltip(characterInfo, index);
     }
 
-    if(!this.state.isPlayerStep) {
+    if (!this.state.isPlayerStep) {
       this.currentAction = cellActions.none;
       return;
     }

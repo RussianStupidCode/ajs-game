@@ -144,8 +144,8 @@ const GET_CHARACTER_TOOLTIP_DATA = [
     expected: '🎖1⚔25🛡25❤100',
   },
   {
-    character: new Swordsman(10),
-    expected: '🎖10⚔40🛡10❤100',
+    character: new Swordsman(1),
+    expected: '🎖1⚔40🛡10❤100',
   },
 ];
 

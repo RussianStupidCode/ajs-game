@@ -3,7 +3,7 @@ const cellActions = {
   move: 1,
   attack: 2,
   select: 3,
-  forbidden: 4
+  forbidden: 4,
 };
 
 export default cellActions;

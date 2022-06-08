@@ -6,7 +6,7 @@ export default class GameState {
     return new GameState(object);
   }
 
-  constructor({ 
+  constructor({
     level = 1,
     isPlayerStep = true,
     selectCellIndex = null,
@@ -23,10 +23,9 @@ export default class GameState {
     this.maxScore = maxScore;
     this.currentScore = currentScore;
 
-    if(Object.keys(playerTeam).length > 0 && Object.keys(computerTeam).length > 0) {
+    if (Object.keys(playerTeam).length > 0 && Object.keys(computerTeam).length > 0) {
       this.computerTeam = Team.from(computerTeam);
       this.playerTeam = Team.from(playerTeam);
     }
-
   }
 }

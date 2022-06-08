@@ -1,15 +1,20 @@
-import Bowman from "./classes/Bowman";
-import Daemon from "./classes/Daemon";
-import Magician from "./classes/Magician";
-import Swordsman from "./classes/Swordsman";
-import Undead from "./classes/Undead";
-import Vampire from "./classes/Vampire";
+import Bowman from './classes/Bowman';
+import Daemon from './classes/Daemon';
+import Magician from './classes/Magician';
+import Swordsman from './classes/Swordsman';
+import Undead from './classes/Undead';
+import Vampire from './classes/Vampire';
 
 export default class CharacterFactory {
-
-  static createCharacter({level, attack, defense, ranges, type}) {
+  static createCharacter({
+    level,
+    attack,
+    defense,
+    ranges,
+    type,
+  }) {
     let character = null;
-    switch(type) {
+    switch (type) {
       case 'bowman':
         character = new Bowman(level, attack, defense, ranges, type);
         break;
@@ -27,6 +32,8 @@ export default class CharacterFactory {
         break;
       case 'vampire':
         character = new Vampire(level, attack, defense, ranges, type);
+        break;
+      default:
         break;
     }
 

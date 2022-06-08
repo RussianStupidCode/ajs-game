@@ -8,7 +8,7 @@ export default class Team {
     const positionedCharacters = object.positionedCharacters.map(({ character, position }) => {
       const restoredCharacter = CharacterFactory.createCharacter(character);
       return new PositionedCharacter(restoredCharacter, position);
-    })
+    });
     team.add(...positionedCharacters);
 
     return team;
@@ -27,7 +27,7 @@ export default class Team {
     }
 
     positionedCharacters.forEach((el) => {
-      if (this.maxLength == -1 || this.length < this.maxLength) {
+      if (this.maxLength === -1 || this.length < this.maxLength) {
         this.positionedCharacters.push(el);
         this.classes.add(el.character.type);
       }

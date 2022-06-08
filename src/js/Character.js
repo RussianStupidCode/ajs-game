@@ -1,4 +1,4 @@
-import { round } from "./utils";
+import { round } from './utils';
 
 export default class Character {
   constructor(level, attack = 0, defense = 0, ranges = { attack: 0, move: 0 }, type = 'generic') {
@@ -12,8 +12,9 @@ export default class Character {
       throw TypeError('class Character is abstract class');
     }
 
-    // т.к. логи повышения уровня очень странная, чтобы сделать зависимость от уровня придется делать в цикле
-    for(let i = 0; i < level - 1; ++i) {
+    // т.к. логи повышения уровня очень странная,
+    // чтобы сделать зависимость от уровня придется делать в цикле
+    for (let i = 0; i < level - 1; i += 1) {
       this.health = 50;
       this.levelUp();
     }
@@ -23,8 +24,8 @@ export default class Character {
     return new this.constructor(
       this.level,
       this.attack,
-      this.defense, 
-      Object.assign({}, this.ranges), 
+      this.defense,
+      { ...this.ranges },
       this.type,
     );
   }
@@ -50,8 +51,8 @@ export default class Character {
     }
 
     this.level += 1;
-    this.attack = round(Math.max(this.attack, this.attack  * (180 - this.health) / 100));
-    this.defense = round(Math.max(this.defense, this.defense  * (180 - this.health) / 100));
+    this.attack = round(Math.max(this.attack, this.attack * 0.01 * (180 - this.health)));
+    this.defense = round(Math.max(this.defense, this.defense * 0.01 * (180 - this.health)));
     this.health = round(Math.min(this.health + 80, 100));
   }
 }

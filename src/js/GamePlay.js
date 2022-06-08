@@ -29,30 +29,6 @@ export default class GamePlay {
     });
   }
 
-  static isCharacterMoving(maxCharacterRange, range) {
-    const remainder = range / Math.sqrt(2);
-
-    if (range % 1 === 0 && maxCharacterRange >= range) {
-      return true;
-    }
-
-    if (remainder > maxCharacterRange) {
-      return false;
-    }
-
-    return CoordinateConverter.isDoubleEqual(remainder % 1, 1) || remainder % 1 === 0;
-  }
-
-  static isCharacterAttack(maxCharacterRange, range) {
-    const remainder = range / Math.sqrt(2);
-
-    if (range % 1 === 0 && maxCharacterRange >= range) {
-      return true;
-    }
-
-    return range < maxCharacterRange + 1;
-  }
-
   constructor(gameStageChangeCallbacks = {
     playerWin: () => {},
     computerWin: () => {},
@@ -85,12 +61,61 @@ export default class GamePlay {
     this.container = container;
   }
 
+  isCharacterMoving(selectedPostionedCharacter, position) {
+    if (!selectedPostionedCharacter) {
+      return false;
+    }
+
+    const range = CoordinateConverter.getRangeForLinearCoordinate(
+      selectedPostionedCharacter.position,
+      position,
+      this.boardSize,
+    );
+
+    const maxCharacterRange = selectedPostionedCharacter.character.ranges.move;
+    const remainder = range / Math.sqrt(2);
+
+    if (range % 1 === 0 && maxCharacterRange >= range) {
+      return true;
+    }
+
+    if (remainder > maxCharacterRange) {
+      return false;
+    }
+
+    return CoordinateConverter.isDoubleEqual(remainder % 1, 1) || remainder % 1 === 0;
+  }
+
+  isCharacterAttack(selectedPostionedCharacter, otherPostionedCharacter) {
+    if (!selectedPostionedCharacter || !otherPostionedCharacter) {
+      return false;
+    }
+
+    const selectedCharPoint = CoordinateConverter.linearToSquare(
+      selectedPostionedCharacter.position,
+      this.boardSize,
+    );
+
+    const otherCharPoint = CoordinateConverter.linearToSquare(
+      otherPostionedCharacter.position,
+      this.boardSize,
+    );
+
+    const maxCharacterRange = selectedPostionedCharacter.character.ranges.attack;
+    const deltaRow = Math.abs(selectedCharPoint.rowIndex - otherCharPoint.rowIndex);
+    const deltaColumn = Math.abs(selectedCharPoint.columnIndex - otherCharPoint.columnIndex);
+
+    return deltaRow <= maxCharacterRange && deltaColumn <= maxCharacterRange;
+  }
+
   setGameStageChangeCallbacks(gameStageChangeCallbacks) {
     this.gameStageChangeCallbacks = gameStageChangeCallbacks;
   }
 
   getAllEmptyCells() {
-    const nonEmptyIndices = new Set([...this.playerTeam, ...this.computerTeam].map((el) => el.position));
+    const nonEmptyIndices = new Set([...this.playerTeam, ...this.computerTeam]
+      .map((el) => el.position));
+
     const allCellIndices = Array(this.boardSize ** 2).fill(0).map((el, index) => index);
     return allCellIndices.filter((el) => !nonEmptyIndices.has(el));
   }
@@ -130,13 +155,13 @@ export default class GamePlay {
     this.redrawPositions([...this.playerTeam, ...this.computerTeam]);
   }
 
-  startNewGame() {
+  startNewGame(level) {
     this.computerTeam.clear();
     this.playerTeam.clear();
 
-    const levelProperty = this.LevelBase.getLevelProperty(1);
+    const levelProperty = this.LevelBase.getLevelProperty(level);
     this.drawUi(levelProperty.theme);
-    this.refreshTeamsForNewLevel(levelProperty, 1);
+    this.refreshTeamsForNewLevel(levelProperty, level);
   }
 
   refreshTeamsForNewLevel(levelProperty, level) {
@@ -174,7 +199,7 @@ export default class GamePlay {
   }
 
   getCellAction(index, selectCellIndex) {
-    if (selectCellIndex == undefined) {
+    if (selectCellIndex === null) {
       return this.getCellActionNoSelectedCell(index);
     }
 
@@ -194,7 +219,7 @@ export default class GamePlay {
   }
 
   getCellActionForSelectedCell(index, selectedCellIndex) {
-    const character = this.getCharacter(selectedCellIndex).character;
+    const positionedCharacter = this.getCharacter(selectedCellIndex);
 
     if (this.isUserCharacter(index) && this.isUserCharacter(selectedCellIndex)) {
       return cellActions.select;
@@ -204,13 +229,14 @@ export default class GamePlay {
       return cellActions.select;
     }
 
-    const range = CoordinateConverter.getRangeForLinearCoordinate(selectedCellIndex, index, this.boardSize);
-
-    if (GamePlay.isCharacterMoving(character.ranges.move, range) && !this.getCharacter(index)) {
-        return cellActions.move;
+    const isCharacterMoving = this.isCharacterMoving(positionedCharacter, index);
+    if (isCharacterMoving) {
+      return cellActions.move;
     }
 
-    if (GamePlay.isCharacterAttack(character.ranges.attack, range) && this.getCharacter(index)) {
+    const otherPositionedCharacter = this.getCharacter(index);
+    const isCharacterAttack = this.isCharacterAttack(positionedCharacter, otherPositionedCharacter);
+    if (isCharacterAttack) {
       return cellActions.attack;
     }
 
@@ -285,16 +311,16 @@ export default class GamePlay {
 
     const damage = attacker.giveDamage(target);
 
-   await this.showDamage(targetIndex, damage).then(() => {
+    await this.showDamage(targetIndex, damage).then(() => {
       this.playerTeam.clearDeadСharacters();
       this.computerTeam.clearDeadСharacters();
 
-      if(this.playerTeam.length === 0) {
+      if (this.playerTeam.length === 0) {
         this.gameStageChangeCallbacks.computerWin();
         return;
-      } 
+      }
 
-      if(this.computerTeam.length === 0) {
+      if (this.computerTeam.length === 0) {
         this.gameStageChangeCallbacks.playerWin();
       }
 
@@ -346,10 +372,6 @@ export default class GamePlay {
       charEl.appendChild(healthEl);
       cellEl.appendChild(charEl);
     }
-  }
-
-  addNextLevelC(callback) {
-
   }
 
   /**
